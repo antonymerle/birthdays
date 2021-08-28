@@ -20,7 +20,8 @@ namespace Birthdays
     static List<Person> personList = new List<Person>();
     static void Main(string[] args)
     {
-      FileInit();
+      FileInit(); // doit intégrer le parsing du JSON
+      AcquireData();
       AddPerson();
       /*
       1. Initialiser le fichier json                  -- OK
@@ -72,8 +73,19 @@ namespace Birthdays
       personList.Add(person);
       Console.WriteLine($"{person.FirstName} {person.LastName}, a vu le jour le {day}/{month}/{year}.");
       Console.WriteLine("Les données ont bien été enregistrées.");
+      string jsonString = JsonSerializer.Serialize(personList, new JsonSerializerOptions() { WriteIndented = true });
+      Console.WriteLine(jsonString);
+      File.WriteAllText(dataFilePath, jsonString);
     }
 
-
+    static void AcquireData()
+    {
+      FileInfo fileInfo = new FileInfo(dataFilePath);
+      if (fileInfo.Length > 0)
+      {
+        string jsonString = File.ReadAllText(dataFilePath);
+        personList = JsonSerializer.Deserialize<List<Person>>(jsonString);
+      }
+    }
   }
 }
