@@ -96,10 +96,23 @@ namespace Birthdays
       string input = Console.ReadLine();
       string[] inputSplit = input.Split(' ');
       List<Person> filteredList = new List<Person>();
-      foreach (string w in inputSplit)
+
+      /* Comportement de la recherche :
+      Si la recherche ne contient qu'un mot, on teste OR
+      Si la recherche contient plus d'un mot, on teste AND
+      */
+      if (inputSplit.Length == 1)
       {
-        filteredList = personList.FindAll(p => p.FirstName.ToLower() == w.ToLower() || p.LastName.ToLower() == w.ToLower());
+        filteredList = personList.FindAll(p => p.FirstName.ToLower() == inputSplit[0].ToLower() || p.LastName.ToLower() == inputSplit[0].ToLower());
       }
+      else
+      {
+        foreach (string w in inputSplit)
+        {
+          filteredList = personList.FindAll(p => p.FirstName.ToLower() == w.ToLower() && p.LastName.ToLower() == w.ToLower());
+        }
+      }
+
 
       Console.WriteLine("Résultats :");
       foreach (Person result in filteredList)
@@ -131,7 +144,6 @@ namespace Birthdays
           Console.WriteLine($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")} dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
         }
       }
-
     }
   }
 }
