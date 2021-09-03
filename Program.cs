@@ -24,11 +24,11 @@ namespace Birthdays
       FileInit(); // doit intégrer le parsing du JSON
       AcquireData();
       // AddPerson();
-      SearchPerson();
+      displayBirthdayResults(SearchPerson());
       /*
       1. Initialiser le fichier json                  -- OK
       2. Charger le fichier et le déserialiser        -- OK
-      3. Chercher des gens
+      3. Chercher des gens                            -- OK
       4. Ajouter des gens                             -- OK
       6. Modifier des gens
       7. Supprimer des gens
@@ -90,7 +90,7 @@ namespace Birthdays
       }
     }
 
-    static void SearchPerson()
+    static List<Person> SearchPerson()
     {
       Console.WriteLine("Qui recherchez-vous ?");
       string input = Console.ReadLine();
@@ -120,7 +120,11 @@ namespace Birthdays
           filteredList = personList.FindAll(p => p.FirstName.ToLower().Contains(w.ToLower()) || p.LastName.ToLower().Contains(w.ToLower()));
         }
       }
+      return filteredList;
+    }
 
+    static void displayBirthdayResults(List<Person> filteredList)
+    {
 
       Console.WriteLine("Résultats :");
       foreach (Person result in filteredList)
