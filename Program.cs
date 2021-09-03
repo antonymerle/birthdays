@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
+using Humanizer;
 
 namespace Birthdays
 {
@@ -22,12 +23,13 @@ namespace Birthdays
     {
       FileInit(); // doit intégrer le parsing du JSON
       AcquireData();
-      AddPerson();
+      // AddPerson();
+      SearchPerson();
       /*
       1. Initialiser le fichier json                  -- OK
-      2. Charger le fichier et le déserialiser
+      2. Charger le fichier et le déserialiser        -- OK
       3. Chercher des gens
-      4. Ajouter des gens                             -- en cours
+      4. Ajouter des gens                             -- OK
       6. Modifier des gens
       7. Supprimer des gens
       8. Serialiser le fichier avec les données MaJ.
@@ -86,6 +88,50 @@ namespace Birthdays
         string jsonString = File.ReadAllText(dataFilePath);
         personList = JsonSerializer.Deserialize<List<Person>>(jsonString);
       }
+    }
+
+    static void SearchPerson()
+    {
+      Console.WriteLine("Qui recherchez-vous ?");
+      string input = Console.ReadLine();
+      string[] inputSplit = input.Split(' ');
+      List<Person> filteredList = new List<Person>();
+      foreach (string w in inputSplit)
+      {
+        filteredList = personList.FindAll(p => p.FirstName.ToLower() == w.ToLower() || p.LastName.ToLower() == w.ToLower());
+      }
+
+      Console.WriteLine("Résultats :");
+      foreach (Person result in filteredList)
+      {
+        //prochain anniversaire = age (now - dob) + 1 - now
+        DateTime now = DateTime.Now;
+        bool isLeapYear = DateTime.IsLeapYear(now.Year);
+        // bug : si l'anniversaire est cette année, le calcul est faux.
+
+        bool isNextBirthdayThisYear = now.Month <= result.DateOfBirth.Month && now.Day <= result.DateOfBirth.Day ? true : false;
+
+        DateTime nextBirthdayDate = isNextBirthdayThisYear ?
+        result.DateOfBirth.AddYears(now.Year - result.DateOfBirth.Year) :
+        result.DateOfBirth.AddYears((now.Year - result.DateOfBirth.Year) + 1);
+
+        int age = isNextBirthdayThisYear ? now.Year - result.DateOfBirth.Year : (now.Year - result.DateOfBirth.Year) + 1;
+
+
+        TimeSpan timeOffset = nextBirthdayDate - now;
+        int offsetInDays = timeOffset.Days + 1;
+        int yearInDays = isLeapYear ? 366 : 365;
+
+        if ((result.DateOfBirth.Month == now.Month) && (result.DateOfBirth.Day == now.Day))
+        {
+          Console.WriteLine($"{result.FirstName} {result.LastName} fête son {age.Ordinalize()} anniversaire aujourd'hui !");
+        }
+        else
+        {
+          Console.WriteLine($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")} dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
+        }
+      }
+
     }
   }
 }
