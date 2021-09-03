@@ -103,13 +103,21 @@ namespace Birthdays
       */
       if (inputSplit.Length == 1)
       {
-        filteredList = personList.FindAll(p => p.FirstName.ToLower() == inputSplit[0].ToLower() || p.LastName.ToLower() == inputSplit[0].ToLower());
+        filteredList = personList.FindAll(p => p.FirstName.ToLower().Contains(inputSplit[0].ToLower()) || p.LastName.ToLower().Contains(inputSplit[0].ToLower()));
+      }
+      else if (inputSplit.Length == 2)
+      {
+
+        filteredList = personList.FindAll(p => (
+          p.FirstName.ToLower().Contains(inputSplit[0].ToLower()) && p.LastName.ToLower().Contains(inputSplit[1].ToLower()) ||
+          p.FirstName.ToLower().Contains(inputSplit[1].ToLower()) && p.LastName.ToLower().Contains(inputSplit[0].ToLower())
+        ));
       }
       else
       {
         foreach (string w in inputSplit)
         {
-          filteredList = personList.FindAll(p => p.FirstName.ToLower() == w.ToLower() && p.LastName.ToLower() == w.ToLower());
+          filteredList = personList.FindAll(p => p.FirstName.ToLower().Contains(w.ToLower()) || p.LastName.ToLower().Contains(w.ToLower()));
         }
       }
 
