@@ -24,7 +24,8 @@ namespace Birthdays
       FileInit(); // doit intégrer le parsing du JSON
       AcquireData();
       // AddPerson();
-      displayBirthdayResults(SearchPerson());
+      //displayBirthdayResults(SearchPerson());
+      modifyPersonData();
       /*
       1. Initialiser le fichier json                  -- OK
       2. Charger le fichier et le déserialiser        -- OK
@@ -123,9 +124,9 @@ namespace Birthdays
       return filteredList;
     }
 
+
     static void displayBirthdayResults(List<Person> filteredList)
     {
-
       Console.WriteLine("Résultats :");
       foreach (Person result in filteredList)
       {
@@ -155,6 +156,97 @@ namespace Birthdays
         {
           Console.WriteLine($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")} dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
         }
+      }
+    }
+
+    static void modifyPersonData()
+    {
+      /*
+      1. entrer requete
+      2. vérifier requete
+      3. trouver objet qui correspond
+      4. modifier objet
+      */
+      List<Person> liste = new List<Person>();
+      do
+      {
+        liste = SearchPerson();
+      } while (liste.Count != 1);
+
+      Console.WriteLine($"Voulez-vous modifier la fiche de {liste[0].FirstName} {liste[0].LastName} né(e) le {liste[0].DateOfBirth.ToString("dd/MM/yyyy")} ? (O/N)");
+      string choix = Console.ReadLine();
+      switch (choix.ToLowerInvariant())
+      {
+        case "o":
+
+          foreach (Person p in personList)
+          {
+            if (liste[0].FirstName.ToLower() == p.FirstName.ToLower() && liste[0].LastName == p.LastName && liste[0].DateOfBirth == p.DateOfBirth)
+            {
+              personList.Remove(p);
+              break;
+            }
+          }
+
+          Console.WriteLine("Voulez-vous modifier le prénom ? O/N");
+          string prenomChoix = Console.ReadLine();
+          switch (prenomChoix.ToLowerInvariant())
+          {
+            case "o":
+              Console.WriteLine("Entrez le prénom de la personne :");
+              liste[0].FirstName = Console.ReadLine();
+              break;
+
+            case "n": break;
+            default: break;
+          }
+
+          Console.WriteLine("Voulez-vous modifier le nom ? O/N");
+          string nomChoix = Console.ReadLine();
+          switch (nomChoix.ToLowerInvariant())
+          {
+            case "o":
+              Console.WriteLine("Entrez le prénom de la personne :");
+              liste[0].FirstName = Console.ReadLine();
+              break;
+
+            case "n": break;
+            default: break;
+          }
+
+          Console.WriteLine("Voulez-vous modifier la date de naissance ? O/N");
+          string DDNChoix = Console.ReadLine();
+          switch (DDNChoix.ToLowerInvariant())
+          {
+            case "o":
+
+              Console.WriteLine($"Entrez la date de naissance de {liste[0].FirstName} {liste[0].LastName} au format JJ/MM/AAAA :");
+              string inputDate = Console.ReadLine();
+              string[] splitInput = inputDate.Split('/');
+              int day = int.Parse(splitInput[0]);
+              int month = int.Parse(splitInput[1]);
+              int year = int.Parse(splitInput[2]);
+
+              liste[0].DateOfBirth = new DateTime(year, month, day);
+              break;
+
+            case "n": break;
+            default: break;
+          }
+
+          personList.Add(liste[0]);
+
+          Console.WriteLine($"{liste[0].FirstName} {liste[0].LastName}, a vu le jour le {liste[0].DateOfBirth.ToString("dd/MM/yyyy")}.");
+          Console.WriteLine("Les données ont bien été enregistrées.");
+          string jsonString = JsonSerializer.Serialize(personList, new JsonSerializerOptions() { WriteIndented = true });
+          Console.WriteLine(jsonString);
+          File.WriteAllText(dataFilePath, jsonString);
+
+          break;
+
+        case "n": break;
+
+        default: return;
       }
     }
   }
