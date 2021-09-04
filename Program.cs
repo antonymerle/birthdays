@@ -26,15 +26,17 @@ namespace Birthdays
       // AddPerson();
       //displayBirthdayResults(SearchPerson());
       //modifyPersonData();
-      DeletePerson();
+      //DeletePerson();
+      PrintAllPersons();
       /*
       1. Initialiser le fichier json                  -- OK
       2. Charger le fichier et le déserialiser        -- OK
       3. Chercher des gens                            -- OK
       4. Ajouter des gens                             -- OK
       6. Modifier des gens                            -- OK
-      7. Supprimer des gens
-      8. Serialiser le fichier avec les données MaJ.
+      7. Supprimer des gens                           -- OK
+      8. Serialiser le fichier avec les données MaJ.  -- OK
+      9. Afficher toutes les personnes                -- OK
       */
 
 
@@ -284,6 +286,12 @@ namespace Birthdays
         default: break;
       }
     }
+
+    static void PrintAllPersons()
+    {
+      displayBirthdayResults(personList);
+    }
+
   }
 
 }
