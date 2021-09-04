@@ -36,6 +36,7 @@ namespace Birthdays
       8.  Serialiser le fichier avec les données MaJ.  -- OK
       9.  Afficher toutes les personnes                -- OK
       10. Implementer menu principal                   -- OK
+      11. Trois prochains anniversaires                
       */
 
 
@@ -44,17 +45,17 @@ namespace Birthdays
     static void UserMenu()
     {
       Console.Clear();
-      Console.WriteLine("Birthdays 0.1 -- 2021 -- Antony Merle, tous droits réservés\n");
+      Console.WriteLine("Birthdays 0.1 -- Antony Merle, tous droits réservés\n");
       while (true)
       {
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.BackgroundColor = ConsoleColor.Black;
         Console.WriteLine("Choisissez une action ou appuyez sur q pour quitter.\n");
-        Console.WriteLine("u:\t\t\tchercher une personne");
-        Console.WriteLine("t:\t\t\tafficher tous les anniversaires");
-        Console.WriteLine("a:\t\t\tajouter un anniversaire");
-        Console.WriteLine("m:\t\t\tmodifier un anniversaire");
-        Console.WriteLine("s:\t\t\tsupprimer un anniversaire");
+        Console.WriteLine("u:\tchercher une personne");
+        Console.WriteLine("t:\tafficher tous les anniversaires");
+        Console.WriteLine("a:\tajouter un anniversaire");
+        Console.WriteLine("m:\tmodifier un anniversaire");
+        Console.WriteLine("s:\tsupprimer un anniversaire");
 
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.BackgroundColor = ConsoleColor.Black;
@@ -65,14 +66,14 @@ namespace Birthdays
 
         switch (menuChoice)
         {
-          case " ":
-            displayBirthdayResults(SearchPerson());
+          case "u":
+            PrintBirthdays(MakeBirthdayAnnouncements(SearchPerson()));
             Console.ReadKey();
             Console.Clear();
             break;
 
           case "t":
-            PrintAllPersons();
+            PrintBirthdays(MakeBirthdayAnnouncements(personList));
             Console.ReadKey();
             Console.Clear();
             break;
@@ -102,7 +103,6 @@ namespace Birthdays
             Console.WriteLine($"{menuChoice} n'est pas un choix disponible.");
             Console.ReadKey();
             Console.Clear();
-
             break;
         }
       }
@@ -195,16 +195,16 @@ namespace Birthdays
     }
 
 
-    static void displayBirthdayResults(List<Person> filteredList)
+    /// <summary>Takes a list of person, deduce their age and next birthday, then returns an array of formatted announcements.</summary>
+    static string[] MakeBirthdayAnnouncements(List<Person> filteredList)
     {
-      Console.WriteLine("Résultats :");
+      List<string> birthdayAnnouncements = new List<string>();
+
       foreach (Person result in filteredList)
       {
         //prochain anniversaire = age (now - dob) + 1 - now
         DateTime now = DateTime.Now;
         bool isLeapYear = DateTime.IsLeapYear(now.Year);
-        // bug : si l'anniversaire est cette année, le calcul est faux.
-
         bool isNextBirthdayThisYear = now.Month <= result.DateOfBirth.Month && now.Day <= result.DateOfBirth.Day ? true : false;
 
         DateTime nextBirthdayDate = isNextBirthdayThisYear ?
@@ -213,20 +213,20 @@ namespace Birthdays
 
         int age = isNextBirthdayThisYear ? now.Year - result.DateOfBirth.Year : (now.Year - result.DateOfBirth.Year) + 1;
 
-
         TimeSpan timeOffset = nextBirthdayDate - now;
         int offsetInDays = timeOffset.Days + 1;
         int yearInDays = isLeapYear ? 366 : 365;
 
         if ((result.DateOfBirth.Month == now.Month) && (result.DateOfBirth.Day == now.Day))
         {
-          Console.WriteLine($"{result.FirstName} {result.LastName} fête son {age.Ordinalize()} anniversaire aujourd'hui !");
+          birthdayAnnouncements.Add(String.Format($"{result.FirstName} {result.LastName} fête son {age.Ordinalize()} anniversaire aujourd'hui !"));
         }
         else
         {
-          Console.WriteLine($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")} dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
+          birthdayAnnouncements.Add($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")}, dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
         }
       }
+      return birthdayAnnouncements.ToArray();
     }
 
     static void modifyPersonData()
@@ -354,9 +354,17 @@ namespace Birthdays
       }
     }
 
-    static void PrintAllPersons()
+    static void PrintBirthdays(string[] announcements = null)
     {
-      displayBirthdayResults(personList);
+
+      if (announcements == null)
+      {
+        return;
+      }
+      foreach (string a in announcements)
+      {
+        Console.WriteLine($"{a}");
+      }
     }
 
   }
