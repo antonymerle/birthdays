@@ -19,26 +19,93 @@ namespace Birthdays
     static string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Birthday");
     static string dataFilePath = Path.Combine(directoryPath, "data.json");
     static List<Person> personList = new List<Person>();
+
+
     static void Main(string[] args)
     {
       FileInit(); // doit intégrer le parsing du JSON
       AcquireData();
-      // AddPerson();
-      //displayBirthdayResults(SearchPerson());
-      //modifyPersonData();
-      //DeletePerson();
-      PrintAllPersons();
+      UserMenu();
       /*
-      1. Initialiser le fichier json                  -- OK
-      2. Charger le fichier et le déserialiser        -- OK
-      3. Chercher des gens                            -- OK
-      4. Ajouter des gens                             -- OK
-      6. Modifier des gens                            -- OK
-      7. Supprimer des gens                           -- OK
-      8. Serialiser le fichier avec les données MaJ.  -- OK
-      9. Afficher toutes les personnes                -- OK
+      1.  Initialiser le fichier json                  -- OK
+      2.  Charger le fichier et le déserialiser        -- OK
+      3.  Chercher des gens                            -- OK
+      4.  Ajouter des gens                             -- OK
+      6.  Modifier des gens                            -- OK
+      7.  Supprimer des gens                           -- OK
+      8.  Serialiser le fichier avec les données MaJ.  -- OK
+      9.  Afficher toutes les personnes                -- OK
+      10. Implementer menu principal                   -- OK
       */
 
+
+    }
+
+    static void UserMenu()
+    {
+      Console.Clear();
+      Console.WriteLine("Birthdays 0.1 -- 2021 -- Antony Merle, tous droits réservés\n");
+      while (true)
+      {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.WriteLine("Choisissez une action ou appuyez sur q pour quitter.\n");
+        Console.WriteLine("u:\t\t\tchercher une personne");
+        Console.WriteLine("t:\t\t\tafficher tous les anniversaires");
+        Console.WriteLine("a:\t\t\tajouter un anniversaire");
+        Console.WriteLine("m:\t\t\tmodifier un anniversaire");
+        Console.WriteLine("s:\t\t\tsupprimer un anniversaire");
+
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.BackgroundColor = ConsoleColor.Black;
+
+
+
+        string menuChoice = Console.ReadLine();
+
+        switch (menuChoice)
+        {
+          case " ":
+            displayBirthdayResults(SearchPerson());
+            Console.ReadKey();
+            Console.Clear();
+            break;
+
+          case "t":
+            PrintAllPersons();
+            Console.ReadKey();
+            Console.Clear();
+            break;
+
+          case "a":
+            AddPerson();
+            Console.ReadKey();
+            Console.Clear();
+            break;
+
+          case "m":
+            modifyPersonData();
+            Console.ReadKey();
+            Console.Clear();
+            break;
+
+          case "s":
+            DeletePerson();
+            Console.ReadKey();
+            Console.Clear();
+            break;
+
+          case "q":
+            return;
+
+          default:
+            Console.WriteLine($"{menuChoice} n'est pas un choix disponible.");
+            Console.ReadKey();
+            Console.Clear();
+
+            break;
+        }
+      }
 
     }
 
