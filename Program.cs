@@ -25,13 +25,14 @@ namespace Birthdays
       AcquireData();
       // AddPerson();
       //displayBirthdayResults(SearchPerson());
-      modifyPersonData();
+      //modifyPersonData();
+      DeletePerson();
       /*
       1. Initialiser le fichier json                  -- OK
       2. Charger le fichier et le déserialiser        -- OK
       3. Chercher des gens                            -- OK
       4. Ajouter des gens                             -- OK
-      6. Modifier des gens
+      6. Modifier des gens                            -- OK
       7. Supprimer des gens
       8. Serialiser le fichier avec les données MaJ.
       */
@@ -249,5 +250,41 @@ namespace Birthdays
         default: return;
       }
     }
+
+    static void DeletePerson()
+    {
+      List<Person> liste = new List<Person>();
+      do
+      {
+        liste = SearchPerson();
+      } while (liste.Count != 1);
+
+      Console.WriteLine($"Voulez-vous supprimer la fiche de {liste[0].FirstName} {liste[0].LastName} né(e) le {liste[0].DateOfBirth.ToString("dd/MM/yyyy")} ? (O/N)");
+      string choix = Console.ReadLine();
+      switch (choix.ToLowerInvariant())
+      {
+        case "o":
+          foreach (Person p in personList)
+          {
+            if (liste[0].FirstName.ToLower() == p.FirstName.ToLower() && liste[0].LastName == p.LastName && liste[0].DateOfBirth == p.DateOfBirth)
+            {
+              personList.Remove(p);
+
+              Console.WriteLine($"La fiche de {liste[0].FirstName} {liste[0].LastName} est bien supprimée.");
+
+              string jsonString = JsonSerializer.Serialize(personList, new JsonSerializerOptions() { WriteIndented = true });
+              Console.WriteLine(jsonString);
+              File.WriteAllText(dataFilePath, jsonString);
+
+              break;
+            }
+          }
+          break;
+
+        default: break;
+      }
+    }
   }
+
 }
+
