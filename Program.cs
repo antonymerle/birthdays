@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 using Humanizer;
 
 namespace Birthdays
@@ -12,6 +13,14 @@ namespace Birthdays
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public DateTime DateOfBirth { get; set; }
+  }
+
+  public struct Announcement
+  {
+    public string announcement;
+    public int age;
+    public int daysBeforeNextBirthday;
+
   }
   class Program
   {
@@ -36,7 +45,7 @@ namespace Birthdays
       8.  Serialiser le fichier avec les données MaJ.  -- OK
       9.  Afficher toutes les personnes                -- OK
       10. Implementer menu principal                   -- OK
-      11. Trois prochains anniversaires                
+      11. Trois prochains anniversaires                -- OK
       */
 
 
@@ -53,6 +62,7 @@ namespace Birthdays
         Console.WriteLine("Choisissez une action ou appuyez sur q pour quitter.\n");
         Console.WriteLine("u:\tchercher une personne");
         Console.WriteLine("t:\tafficher tous les anniversaires");
+        Console.WriteLine("p:\tafficher les prochains anniversaires");
         Console.WriteLine("a:\tajouter un anniversaire");
         Console.WriteLine("m:\tmodifier un anniversaire");
         Console.WriteLine("s:\tsupprimer un anniversaire");
@@ -74,6 +84,12 @@ namespace Birthdays
 
           case "t":
             PrintBirthdays(MakeBirthdayAnnouncements(personList));
+            Console.ReadKey();
+            Console.Clear();
+            break;
+
+          case "p":
+            PrintBirthdays(FindNextBirthdays());
             Console.ReadKey();
             Console.Clear();
             break;
@@ -196,9 +212,10 @@ namespace Birthdays
 
 
     /// <summary>Takes a list of person, deduce their age and next birthday, then returns an array of formatted announcements.</summary>
-    static string[] MakeBirthdayAnnouncements(List<Person> filteredList)
+    // TODO : renvoyer une liste de structs { string announcement ; int age ; int daysBeforeNextBirthday}
+    static Announcement[] MakeBirthdayAnnouncements(List<Person> filteredList)
     {
-      List<string> birthdayAnnouncements = new List<string>();
+      List<Announcement> birthdayAnnouncements = new List<Announcement>();
 
       foreach (Person result in filteredList)
       {
@@ -217,13 +234,23 @@ namespace Birthdays
         int offsetInDays = timeOffset.Days + 1;
         int yearInDays = isLeapYear ? 366 : 365;
 
+
         if ((result.DateOfBirth.Month == now.Month) && (result.DateOfBirth.Day == now.Day))
         {
-          birthdayAnnouncements.Add(String.Format($"{result.FirstName} {result.LastName} fête son {age.Ordinalize()} anniversaire aujourd'hui !"));
+          Announcement a = new Announcement();
+
+          a.age = age;
+          a.daysBeforeNextBirthday = offsetInDays % yearInDays;
+          birthdayAnnouncements.Add(a);
+          a.announcement = String.Format($"{result.FirstName} {result.LastName} fête son {age.Ordinalize()} anniversaire aujourd'hui !");
         }
         else
         {
-          birthdayAnnouncements.Add($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")}, dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
+          Announcement a = new Announcement();
+          a.age = age;
+          a.daysBeforeNextBirthday = offsetInDays % yearInDays;
+          a.announcement = String.Format($"{result.FirstName} {result.LastName} fêtera son {age.Ordinalize()} anniversaire le {nextBirthdayDate.ToString("dddd dd MMMM yyyy")}, dans {"jour".ToQuantity(offsetInDays % (yearInDays))} !");
+          birthdayAnnouncements.Add(a);
         }
       }
       return birthdayAnnouncements.ToArray();
@@ -354,19 +381,27 @@ namespace Birthdays
       }
     }
 
-    static void PrintBirthdays(string[] announcements = null)
+    static void PrintBirthdays(Announcement[] announcements = null)
     {
 
       if (announcements == null)
       {
         return;
       }
-      foreach (string a in announcements)
+      foreach (Announcement a in announcements)
       {
-        Console.WriteLine($"{a}");
+        Console.WriteLine($"{a.announcement}");
       }
     }
 
+    static Announcement[] FindNextBirthdays(int n = 3)
+    {
+      var announcements = MakeBirthdayAnnouncements(personList);
+      var filteredAnnouncements = announcements.OrderBy(a => a.daysBeforeNextBirthday).Take(n);
+
+
+      return filteredAnnouncements.ToArray();
+    }
   }
 
 }
