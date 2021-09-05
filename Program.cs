@@ -25,9 +25,21 @@ namespace Birthdays
   class Program
   {
 
-    static string directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Birthday");
-    static string dataFilePath = Path.Combine(directoryPath, "data.json");
-    static List<Person> personList = new List<Person>();
+    static string m_directoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Birthday");
+    static string m_dataFilePath = Path.Combine(m_directoryPath, "data.json");
+    static List<Person> m_personList = new List<Person>();
+
+    static string[] m_MenuEntries =
+    {
+        "Choisissez une action ou appuyez sur q pour quitter.\n",
+        "u:\tchercher une personne",
+        "t:\tafficher tous les anniversaires",
+        "p:\tafficher les prochains anniversaires",
+        "a:\tajouter un anniversaire",
+        "m:\tmodifier un anniversaire",
+        "s:\tsupprimer un anniversaire"
+    };
+
 
 
     static void Main(string[] args)
@@ -51,61 +63,76 @@ namespace Birthdays
 
     }
 
+    static void CyanConsoleDisplayer(string message = null, string[] entries = null)
+    {
+      Console.ForegroundColor = ConsoleColor.Cyan;
+      Console.BackgroundColor = ConsoleColor.Black;
+
+      if (entries != null)
+      {
+        foreach (string e in entries)
+        {
+          Console.WriteLine(e);
+        }
+      }
+
+      if (message != null)
+      {
+        Console.WriteLine(message);
+      }
+
+      Console.ForegroundColor = ConsoleColor.Gray;
+      Console.BackgroundColor = ConsoleColor.Black;
+    }
     static void UserMenu()
     {
       Console.Clear();
       Console.WriteLine("Birthdays 0.1 -- Antony Merle, tous droits réservés\n");
       while (true)
       {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.BackgroundColor = ConsoleColor.Black;
-        Console.WriteLine("Choisissez une action ou appuyez sur q pour quitter.\n");
-        Console.WriteLine("u:\tchercher une personne");
-        Console.WriteLine("t:\tafficher tous les anniversaires");
-        Console.WriteLine("p:\tafficher les prochains anniversaires");
-        Console.WriteLine("a:\tajouter un anniversaire");
-        Console.WriteLine("m:\tmodifier un anniversaire");
-        Console.WriteLine("s:\tsupprimer un anniversaire");
-
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.BackgroundColor = ConsoleColor.Black;
-
+        CyanConsoleDisplayer(null, m_MenuEntries);
         string menuChoice = Console.ReadLine();
 
         switch (menuChoice)
         {
           case "u":
             PrintBirthdays(MakeBirthdayAnnouncements(SearchPerson()));
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
 
           case "t":
-            PrintBirthdays(MakeBirthdayAnnouncements(personList));
+            PrintBirthdays(MakeBirthdayAnnouncements(m_personList));
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
 
           case "p":
             PrintBirthdays(FindNextBirthdays());
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
 
           case "a":
             AddPerson();
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
 
           case "m":
             modifyPersonData();
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
 
           case "s":
             DeletePerson();
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
@@ -115,6 +142,7 @@ namespace Birthdays
 
           default:
             Console.WriteLine($"{menuChoice} n'est pas un choix disponible.");
+            CyanConsoleDisplayer("Appuyez sur une touche pour continuer.");
             Console.ReadKey();
             Console.Clear();
             break;
@@ -126,16 +154,16 @@ namespace Birthdays
     /// If not, creates it. If it fails to do so, throw an FileLoadException()</summary>
     static void FileInit()
     {
-      if (File.Exists(dataFilePath))
+      if (File.Exists(m_dataFilePath))
       {
         Debug.WriteLine("data.json existe.");
       }
       else
       {
-        Directory.CreateDirectory(directoryPath);
-        File.Create(dataFilePath);
+        Directory.CreateDirectory(m_directoryPath);
+        File.Create(m_dataFilePath);
         Debug.WriteLine("data.json absent, création du fichier.");
-        if (!File.Exists(dataFilePath))
+        if (!File.Exists(m_dataFilePath))
           throw new FileLoadException();
       }
     }
@@ -156,21 +184,21 @@ namespace Birthdays
       int year = int.Parse(splitInput[2]);
 
       person.DateOfBirth = new DateTime(year, month, day);
-      personList.Add(person);
+      m_personList.Add(person);
       Console.WriteLine($"{person.FirstName} {person.LastName}, a vu le jour le {day}/{month}/{year}.");
       Console.WriteLine("Les données ont bien été enregistrées.");
-      string jsonString = JsonSerializer.Serialize(personList, new JsonSerializerOptions() { WriteIndented = true });
+      string jsonString = JsonSerializer.Serialize(m_personList, new JsonSerializerOptions() { WriteIndented = true });
       Console.WriteLine(jsonString);
-      File.WriteAllText(dataFilePath, jsonString);
+      File.WriteAllText(m_dataFilePath, jsonString);
     }
 
     static void AcquireData()
     {
-      FileInfo fileInfo = new FileInfo(dataFilePath);
+      FileInfo fileInfo = new FileInfo(m_dataFilePath);
       if (fileInfo.Length > 0)
       {
-        string jsonString = File.ReadAllText(dataFilePath);
-        personList = JsonSerializer.Deserialize<List<Person>>(jsonString);
+        string jsonString = File.ReadAllText(m_dataFilePath);
+        m_personList = JsonSerializer.Deserialize<List<Person>>(jsonString);
       }
     }
 
@@ -187,12 +215,12 @@ namespace Birthdays
       */
       if (inputSplit.Length == 1)
       {
-        filteredList = personList.FindAll(p => p.FirstName.ToLower().Contains(inputSplit[0].ToLower()) || p.LastName.ToLower().Contains(inputSplit[0].ToLower()));
+        filteredList = m_personList.FindAll(p => p.FirstName.ToLower().Contains(inputSplit[0].ToLower()) || p.LastName.ToLower().Contains(inputSplit[0].ToLower()));
       }
       else if (inputSplit.Length == 2)
       {
 
-        filteredList = personList.FindAll(p => (
+        filteredList = m_personList.FindAll(p => (
           p.FirstName.ToLower().Contains(inputSplit[0].ToLower()) && p.LastName.ToLower().Contains(inputSplit[1].ToLower()) ||
           p.FirstName.ToLower().Contains(inputSplit[1].ToLower()) && p.LastName.ToLower().Contains(inputSplit[0].ToLower())
         ));
@@ -201,7 +229,7 @@ namespace Birthdays
       {
         foreach (string w in inputSplit)
         {
-          filteredList = personList.FindAll(p => p.FirstName.ToLower().Contains(w.ToLower()) || p.LastName.ToLower().Contains(w.ToLower()));
+          filteredList = m_personList.FindAll(p => p.FirstName.ToLower().Contains(w.ToLower()) || p.LastName.ToLower().Contains(w.ToLower()));
         }
       }
       return filteredList;
@@ -272,11 +300,11 @@ namespace Birthdays
       {
         case "o":
 
-          foreach (Person p in personList)
+          foreach (Person p in m_personList)
           {
             if (liste[0].FirstName.ToLower() == p.FirstName.ToLower() && liste[0].LastName == p.LastName && liste[0].DateOfBirth == p.DateOfBirth)
             {
-              personList.Remove(p);
+              m_personList.Remove(p);
               break;
             }
           }
@@ -327,13 +355,13 @@ namespace Birthdays
             default: break;
           }
 
-          personList.Add(liste[0]);
+          m_personList.Add(liste[0]);
 
           Console.WriteLine($"{liste[0].FirstName} {liste[0].LastName}, a vu le jour le {liste[0].DateOfBirth.ToString("dd/MM/yyyy")}.");
           Console.WriteLine("Les données ont bien été enregistrées.");
-          string jsonString = JsonSerializer.Serialize(personList, new JsonSerializerOptions() { WriteIndented = true });
+          string jsonString = JsonSerializer.Serialize(m_personList, new JsonSerializerOptions() { WriteIndented = true });
           Console.WriteLine(jsonString);
-          File.WriteAllText(dataFilePath, jsonString);
+          File.WriteAllText(m_dataFilePath, jsonString);
 
           break;
 
@@ -356,17 +384,17 @@ namespace Birthdays
       switch (choix.ToLowerInvariant())
       {
         case "o":
-          foreach (Person p in personList)
+          foreach (Person p in m_personList)
           {
             if (liste[0].FirstName.ToLower() == p.FirstName.ToLower() && liste[0].LastName == p.LastName && liste[0].DateOfBirth == p.DateOfBirth)
             {
-              personList.Remove(p);
+              m_personList.Remove(p);
 
               Console.WriteLine($"La fiche de {liste[0].FirstName} {liste[0].LastName} est bien supprimée.");
 
-              string jsonString = JsonSerializer.Serialize(personList, new JsonSerializerOptions() { WriteIndented = true });
+              string jsonString = JsonSerializer.Serialize(m_personList, new JsonSerializerOptions() { WriteIndented = true });
               Console.WriteLine(jsonString);
-              File.WriteAllText(dataFilePath, jsonString);
+              File.WriteAllText(m_dataFilePath, jsonString);
 
               break;
             }
@@ -393,7 +421,7 @@ namespace Birthdays
     /// <summary>Takes an array of Annoucement structs, generated by MakeBirthdayAnnouncements and returns n next birthdays.</summary>
     static Announcement[] FindNextBirthdays(int n = 3)
     {
-      var announcements = MakeBirthdayAnnouncements(personList);
+      var announcements = MakeBirthdayAnnouncements(m_personList);
       var filteredAnnouncements = announcements.OrderBy(a => a.daysBeforeNextBirthday).Take(n);
 
       return filteredAnnouncements.ToArray();
